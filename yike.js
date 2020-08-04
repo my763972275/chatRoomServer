@@ -1,21 +1,27 @@
 const express = require('express')
 const app = express()
 const port = 3000
+var bodyParser = require('body-parser')
 
-
-app.get('/',(req,res) => res.send('nihao!'))
-
-
+app.use(bodyParser.json());
+require('./router/index')(app)
 //设置允许跨域访问该服务
 app.all('*',function (req,res,next){
-    res.header('Access-Control-Allow-Origin','http://localhost:8080');
-    res.header('Access-Control-Allow-Headers','Content-Type');
-    res.header('Access-Control-Allow-Methods','*');
+    res.header('Access-Control-Allow-Origin','*');
+    res.header('Access-Control-Allow-Headers','Origin,X-Requested-With,Content-Type,Accept');
+    res.header('Access-Control-Allow-Credentials',true);
+    res.header('Access-Control-Allow-Methods','PUT,POST,GET,DELETE,OPTIONS')
+    res.header('X-Powered-By','3.2.1')
     res.header('Content-Type','application/json;charset=utf-8');
-    next();
+    if(req.method == 'OPTIONS'){
+        res.sendStatus(200);
+    }else{
+        next();
+    }
+    
 });
 
-require('./router/index')(app)
+
 
 //404页面
 app.use(function(req,res,next){
