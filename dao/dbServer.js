@@ -1,6 +1,9 @@
 // var db = require('../config/db');
 var dbModel = require('../model/dbmodel')
-var User = dbModel.model('User')
+var User = dbModel.model('User');
+var Friend = dbModel.model('Friend');
+var Group = dbModel.model('Group')
+var GroupUser = dbModel.model('GroupUser')
 var bcrypt = require('./bcryptjs')
 var jwt = require('./jwt')
 
@@ -64,6 +67,85 @@ exports.userMatch = function(data,pwd,res){
                     res.send({status:400})
                 }
             })
+            
+        }
+    })
+}
+
+
+//搜索用户
+exports.searchUser = function(data,res){
+    if(data == 'yike'){
+        let wherestr = {};
+    }else{
+        //模糊查询
+        let wherestr = {$or:[{'name': {$regex:data}}, {'email': {$regex:data}}]}
+    }
+    let out = {'name':1,'email':1,'imgurl':1}
+    User.find(wherestr,out,function(err,result){
+        if(err){
+            res.send({status:500})
+        }else{
+            res.send({status:200,result})
+        }
+    })
+}
+
+
+//用户匹配 判断是否为好友
+exports.isFriend = function(uid,fid,res){
+    let wherestr = {'userID':uid,'friendID':fid,'state':0}
+    Friend.findOne(wherestr,function(err,result){
+        if(err){
+            res.send({status:500})
+        }else{
+            if(result){
+                //是好友
+              res.send({status:200,tip:1})  
+            }else{
+                //不是好友
+                res.send({status:400})
+            }
+            
+        }
+    })
+}
+
+//搜索群
+exports.searchGroup = function(data,res){
+    if(data == 'yike'){
+        let wherestr = {}
+    }else{
+        let wherestr = {'name':{$regex : data}}
+    }
+    let out = {
+        'name':1,
+        'imgurl':1
+    }
+    Group.find(wherestr,out,function(err,result){
+        if(err){
+            res.send({status:500})
+        }else{
+            res.send({status:200,result})
+        }
+    })
+}
+
+
+//判断是否在群里
+exports.isInGroup = function(uid,gid,res){
+    let wherestr = {'userID':uid,'groupID':gid}
+    Friend.findOne(wherestr,function(err,result){
+        if(err){
+            res.send({status:500})
+        }else{
+            if(result){
+                //是在群内
+              res.send({status:200,tip:1})  
+            }else{
+                //不在群内
+                res.send({status:400})
+            }
             
         }
     })
