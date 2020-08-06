@@ -8,6 +8,20 @@ exports.searchUser = function(req,res){
 }
 
 //判断是否为好友
-exports.isFriend = function(params) {
-    
+exports.isFriend = function(req,res) {
+    let {uid,fid} = req.body;
+    dbserver.isFriend(uid,fid,res)
+}
+
+//用户群
+exports.searchGroup = function(req,res){
+    let data = req.body.data;
+    dbserver.searchGroup(data,res)
+}
+
+//判断是否为好友
+exports.isInGroup = function(req,res){
+    let uid = req.body.uid;
+    let fid = req.body.fid;
+    dbserver.isInGroup(uid,fid,res)
 }

@@ -13,6 +13,7 @@ var UserSchema = new Schema({
     explain:{type:Number},                       //介绍
     imgUrl:{type:String, default:'user.png'},    //头像
     time:{type:Date},                            //注册时间
+    type:{type:String}                          
 });
 
 
