@@ -12,8 +12,7 @@ var UserSchema = new Schema({
     phone:{type:Number},                         //电话
     explain:{type:Number},                       //介绍
     imgUrl:{type:String, default:'user.png'},    //头像
-    time:{type:Date},                            //注册时间
-    type:{type:String}                          
+    time:{type:Date},                            //注册时间                       
 });
 
 
@@ -24,6 +23,7 @@ var FriendSchema = new Schema({
     state:{type:String},                                //好友状态
     markname:{type:String},                             //好友昵称
     time:{type:Date},                                   //生成好友时间
+    lastTime:{type:Date}                                //最后通讯时间
 })
 
 //一对一消息表
@@ -52,6 +52,7 @@ var GroupUserSchema = new Schema({
     name:{type:String},                                 //群内名称
     tip:{type:Number,default:0},                        //未读消息数
     time:{type:Date},                                   //发送时间
+    lastTime:{type:Date},                               //最后通讯时间
     shield:{type:Number}                                //是否屏蔽群
 })
 

@@ -1,11 +1,12 @@
 // var db = require('../config/db');
-var dbModel = require('../model/dbmodel')
+var dbModel = require('../model/dbmodel');
 var User = dbModel.model('User');
 var Friend = dbModel.model('Friend');
-var Group = dbModel.model('Group')
-var GroupUser = dbModel.model('GroupUser')
-var bcrypt = require('./bcryptjs')
-var jwt = require('./jwt')
+var Group = dbModel.model('Group');
+var GroupUser = dbModel.model('GroupUser');
+let Message = dbModel.model('Message');
+var bcrypt = require('./bcryptjs');
+var jwt = require('./jwt');
 
 
 function update(data,update,res){
@@ -50,9 +51,9 @@ exports.countUserValue = function(data,type,res){
     str[type] = data    // 等同于wherestr = {'type':data }
     User.countDocuments(str,function(err,result){
         if(err){
-            res.send({status:500})
+            return res.json({status:500})
         }else{
-            res.send({status:200},result)
+           return res.json({status:200,result})
         }
     })
 }
@@ -108,7 +109,7 @@ exports.searchUser = function(data,res){
     })
 }
 
-
+//暂时无法测试，后期接口全写完测试
 //用户匹配 判断是否为好友
 exports.isFriend = function(uid,fid,res){
     let wherestr = {'userID':uid,'friendID':fid,'state':0}
@@ -127,7 +128,7 @@ exports.isFriend = function(uid,fid,res){
         }
     })
 }
-
+//暂时无法测试，后期接口全写完测试
 //搜索群
 exports.searchGroup = function(data,res){
     let wherestr
@@ -149,7 +150,7 @@ exports.searchGroup = function(data,res){
     })
 }
 
-
+//暂时无法测试，后期接口全写完测试
 //判断是否在群里
 exports.isInGroup = function(uid,gid,res){
     let wherestr = {'userID':uid,'groupID':gid}
@@ -188,7 +189,7 @@ exports.userDetail = function(id,res){
 exports.userUpdate = function(data,res){
     let updatestr = {}
     // 判断是否有密码项
-    if(typeof(data.pwd != 'undefined')){
+    if(typeof(data.pwd) != 'undefined'){
         // 有密码项
         User.find({'_id':data.id},{'psw':1},function(err,result){
             if(err){
@@ -206,14 +207,14 @@ exports.userUpdate = function(data,res){
                             updatestr[data.type] = password;
                             update(data.id,updatestr,res)
                         }else{
-                            updatestr[data.type] = data.data;
                             // 邮箱验证
-                            User.countDocuments(updatestr,function(err,resu){
+                            updatestr[data.type] = data.data;
+                            User.countDocuments(updatestr,function(err,result){
                                 if(err){
                                     res.send({status:500})
                                 }else{
                                     //没有匹配项，可以修改
-                                    if(resu == 0){
+                                    if(result == 0){
                                         update(data.id,updatestr,res)
                                     }else{
                                         //已存在
@@ -230,14 +231,14 @@ exports.userUpdate = function(data,res){
             }
         })
     }else if(data.type == 'name'){
-        updatestr[data.type] = data.data
         //如果是用户名先进行匹配
-        User.countDocuments(updatestr,function(err,resu){
+        updatestr[data.type] = data.data;
+        User.countDocuments(updatestr,function(err,result){
             if(err){
                 res.send({status:500})
             }else{
                 //没有匹配项，可以修改
-                if(resu == 0){
+                if(result == 0){
                     update(data.id,updatestr,res)
                 }else{
                     //已存在
@@ -252,7 +253,7 @@ exports.userUpdate = function(data,res){
     }
 }
 
-
+// 还没测试
 // 修改好友昵称
 exports.friendMarkName = function(data,res){
     let wherestr = {'userID':data.uid,'friendID':data.fid};
@@ -268,3 +269,108 @@ exports.friendMarkName = function(data,res){
     })
 }
 
+
+/**
+ * 好友操作
+ */
+//添加好友表
+exports.buildFriend = function(uid,fid,state,res){
+    let data = {
+        userID:uid,
+        friendID:fid,
+        state:state,
+        lastTime:new Date()
+    }
+    let friend = new Friend(data);
+    friend.save(function(err,result){
+        if(err){
+            console.log('申请好友出错')
+        }else{
+            // res.send({status:200})
+        }
+    })
+}
+
+//好友最后通讯时间
+exports.upFriendLastTime = function(data){
+    let wherestr = {$or:[{'userID':data.uid,'friendID':data.fid},{'userID':data.fid,'friendID':data.uid}]};
+    let updatestr = {'lastTime':new Date()};
+    Friend.update(wherestr,updatestr,function(err,result){
+        if(err){
+            console.log('好友最后通讯时间出错')
+        }else{
+            // res.send({status:200})
+        }
+    })
+}
+
+
+// 添加一对一消息
+exports.insertMsg = function(uid,fid,msg,type,res){
+    let data = {
+        userID:uid,
+        friendID:fid,
+        message:msg,
+        types:type,
+        time:new Date(),
+        state:1
+    }
+    let message = new Message(data);
+
+    message.save(function(err,result){
+        if(err){
+            res.send({status:500})
+        }else{
+            res.send({status:200})
+        }
+    })
+}
+
+
+//申请表
+exports.applyFriend = function(data,res){
+    //判断是否已经申请过
+    let wherestr = {'userID':data.uid,'friendID':data.fid}
+    Friend.countDocuments(wherestr,(err,result) => {
+        if(err){
+            res.send({status:500})
+        }else{
+                //如果result >= 0 为初次申请
+            if(result == 0){
+                this.buildFriend(data.uid,data.fid,2);
+                this.buildFriend(data.fid,data.uid,1);
+            }else{
+                //已经申请过好友
+                this.upFriendLastTime(data);
+            }
+            //添加消息
+            this.insertMsg(data.uid,data.fid,data.msg,0,res)
+        }
+    })
+}
+
+//更新好友状态
+exports.updateFriendState = function(data,res){
+    //修改项
+    let wherestr = {$or:[{'userID':data.uid,'friendID':data.fid},{'userID':data.fid,'friendID':data.uid}]};
+    Friend.updateMany(wherestr,{'state':0},function(err,result){
+        if(err){
+            res.send({status:500})
+        }else{
+            res.send({status:200})
+        }
+    })
+}
+
+//拒绝好友 删除好友
+exports.deleteFriend = function(data,res){
+    //修改项
+    let wherestr = {$or:[{'userID':data.uid,'friendID':data.fid},{'userID':data.fid,'friendID':data.uid}]};
+    Friend.deleteMany(wherestr,function(err,result){
+        if(err){
+            res.send({status:500})
+        }else{
+            res.send({status:200})
+        }
+    })
+}

@@ -9,6 +9,7 @@ var signin = require('../server/signin');
 var search = require('../server/search');
 // 用户详情页面的服务
 var user = require('../server/userdetail')
+var friend = require('../server/friend')
 
 module.exports = function(app){
     app.get('/test',(req,res) => {
@@ -28,7 +29,7 @@ module.exports = function(app){
     app.post('/signup/add',(req,res) => {
         signup.signUp(req,res);
     })
-
+    //测试没通过
     // 判断用户名是否重复
     app.post('/signup/judge',(req,res) => {
         signup.judgeValue(req,res)
@@ -85,5 +86,21 @@ module.exports = function(app){
 
     app.post('/user/update',(req,res) => {
         user.userUpdate(req,res)
+    })
+
+
+    //申请好友
+    app.post('/friend/applyfriend',(req,res) => {
+        friend.applyFriend(req,res)
+    })
+
+    //申请状态修改
+    app.post('/friend/updateFriendState',(req,res) => {
+        friend.updateFriendState(req,res)
+    })
+
+    //拒绝好友或删除好友
+    app.post('/friend/deletefriend',(req,res)=>{
+        friend.deleteFriend(req,res)
     })
 }
