@@ -1,6 +1,13 @@
 const express = require('express')
 const app = express()
 const port = 3000
+
+//socket.io
+var server = app.listen(8082);
+var io = require('socket.io').listen(server);
+require('./dao/socket')(io);
+
+//解析前端数据
 var bodyParser = require('body-parser')
 app.use(bodyParser.urlencoded({limit:'50mb',extended:true}))
 app.use(bodyParser.json({limit:'50mb'}));

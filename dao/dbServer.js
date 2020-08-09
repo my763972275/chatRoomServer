@@ -4,7 +4,8 @@ var User = dbModel.model('User');
 var Friend = dbModel.model('Friend');
 var Group = dbModel.model('Group');
 var GroupUser = dbModel.model('GroupUser');
-let Message = dbModel.model('Message');
+var Message = dbModel.model('Message');
+var GroupMsg = dbModel.model('GroupMsg')
 var bcrypt = require('./bcryptjs');
 var jwt = require('./jwt');
 
@@ -367,6 +368,142 @@ exports.deleteFriend = function(data,res){
     //修改项
     let wherestr = {$or:[{'userID':data.uid,'friendID':data.fid},{'userID':data.fid,'friendID':data.uid}]};
     Friend.deleteMany(wherestr,function(err,result){
+        if(err){
+            res.send({status:500})
+        }else{
+            res.send({status:200})
+        }
+    })
+}
+
+//按需求获取用户列表
+exports.getUsers = function(data,res){
+    let query = Friend.find({});
+    //查询条件
+    query.where({'userID':data.uid,'state':data.state})
+    //查找friendID 关联的userID的对象
+    query.populate('friendID')
+    //排序方式 根据通讯时间排序
+    query.sort({'lastTime':-1})
+    query.exec().then(function(e){
+        let result = e.map(function(ver){
+            return {
+                id:ver.friendID._id,
+                name:ver.friendID.name,
+                markname:ver.markname,
+                imgurl:ver.friendID.imgurl,
+                lastTime:ver.lastTime
+            }
+        })
+        res.send({status:200,result})
+    }).catch(function(err){
+        res.send({status:500})
+    })
+}
+
+//按要求获取一对一消息
+exports.getOneMsg = function(data,res){
+    let query = Message.findOne({});
+    //查询条件
+    query.where({$or:[{'userID':data.uid,'friendID':data.fid},{'userID':data.fid,'friendID':data.uid}]})
+    
+    //排序方式 根据通讯时间排序
+    query.sort({'time':-1})
+    query.exec().then(function(e){
+        let result =  {
+            message:e.message,
+            time:e.time,
+            types:e.types
+        }
+        res.send({status:200,result})
+    }).catch(function(err){
+        res.send({status:500})
+    })
+}
+
+//获取未读消息数
+exports.unreadMsg = function(data,res){
+    //汇总条件
+    let wherestr = {'userID':data.uid,'friendID':data.fid,'state':1};
+    Message.countDocuments(wherestr,(err,result) => {
+        if(err){
+            res.send({status:500})
+        }else{
+            res.send({status:200,result})
+        }
+    })
+}
+
+//一对一消息状态修改
+exports.updateMsg = function(data,res){
+    //修改项条件
+    let wherestr = {'userID':data.uid,'friendID':data.fid,'state':1};
+    //修改内容
+    let updatestr = {'state':0}
+    Message.updateMany(wherestr,updatestr,(err,result) => {
+        if(err){
+            res.send({status:500})
+        }else{
+            res.send({status:200})
+        }
+    })
+}
+
+//按要求获取群列表
+exports.getGroup = function(uid,res){
+    //id为用户所在的群
+    let query = GroupUser.find({});
+    //查询条件
+    query.where({'userID':uid})
+    //查找friendID 关联的userID的对象
+    query.populate('groupID')
+    //排序方式 根据通讯时间排序
+    query.sort({'lastTime':-1})
+    query.exec().then(function(e){
+        let result = e.map(function(ver){
+            return {
+                gid:ver.groupID._id,
+                name:ver.groupID.name,
+                markname:ver.name,
+                imgurl:ver.groupID.imgurl,
+                lastTime:ver.lastTime,
+                tip:ver.tip
+            }
+        })
+        res.send({status:200,result})
+    }).catch(function(err){
+        res.send({status:500})
+    })
+}
+
+//按要求获取群消息
+exports.getOneGroupMsg = function(gid,res){
+    var query = GroupMsg.findOne({});
+    query.where({'groupID':gid})
+    //关联的user对象
+    query.populate('groupID')
+    query.sort({'time':-1});
+    query.exec().then(function(ver){
+        let result = {
+            message:ver.message,
+            time:ver.time,
+            types:ver.types,
+            name:ver.userID.name
+        }
+        res.send({status:200,result})
+    }).catch(function(err){
+        res.send({status:500})
+    })
+}
+
+
+//群消息状态修改
+exports.updateGroupMsg = function(gid,res){
+    //修改项条件
+    let wherestr = {'groupID':gid};
+    //修改内容
+    let updatestr = {'tip':0}
+    Message.updateMany(wherestr,updatestr,(err,result) => {
         if(err){
             res.send({status:500})
         }else{

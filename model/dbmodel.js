@@ -11,7 +11,7 @@ var UserSchema = new Schema({
     birth:{type:Date},                           //生日
     phone:{type:Number},                         //电话
     explain:{type:Number},                       //介绍
-    imgUrl:{type:String, default:'user.png'},    //头像
+    imgUrl:{type:String, default:'/images/user.png'},    //头像
     time:{type:Date},                            //注册时间                       
 });
 

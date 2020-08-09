@@ -10,6 +10,7 @@ var search = require('../server/search');
 // 用户详情页面的服务
 var user = require('../server/userdetail')
 var friend = require('../server/friend')
+var index = require('../server/index')
 
 module.exports = function(app){
     app.get('/test',(req,res) => {
@@ -102,5 +103,41 @@ module.exports = function(app){
     //拒绝好友或删除好友
     app.post('/friend/deletefriend',(req,res)=>{
         friend.deleteFriend(req,res)
+    })
+
+    //主页
+    //获取好友
+    app.post('/index/getfriend',(req,res)=>{
+        index.getFriend(req,res)
+    })
+
+    //获取最后一条消息
+    app.post('/index/getlastmsg',(req,res)=>{
+        index.getLastMsg(req,res)
+    })
+
+    //获取未读消息数
+    app.post('/index/unreadmsg',(req,res) => {
+        index.unreadMsg(req,res)
+    })
+
+    //好友消息标已读
+    app.post('/index/updatemsg',(req,res) => {
+        index.updateMsg(req,res)
+    })
+
+    //获取群
+    app.post('/index/getgroup',(req,res) => {
+        index.getGroup(req,res)
+    })
+
+    //获取最后一条群消息
+    app.post('/index/getlastgroupmsg',(req,res) => {
+        index.getLastGroupMsg(req,res)
+    })
+
+    //群消息标为已读
+    app.post('/index/updategroupmsg',(req,res) => {
+        index.updateGroupMsg(req,res)
     })
 }
