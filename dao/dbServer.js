@@ -52,9 +52,9 @@ exports.countUserValue = function(data,type,res){
     str[type] = data    // 等同于wherestr = {'type':data }
     User.countDocuments(str,function(err,result){
         if(err){
-            return res.json({status:500})
+            res.send({status:500})
         }else{
-           return res.json({status:200,result})
+            res.send({status:200,result})
         }
     })
 }

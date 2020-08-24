@@ -14,7 +14,8 @@ var index = require('../server/index')
 
 module.exports = function(app){
     app.get('/test',(req,res) => {
-        dbServer.findUser(res);
+        res.send('11111')
+        // dbServer.findUser(res);
     })
 
     // 邮箱测试
@@ -30,7 +31,6 @@ module.exports = function(app){
     app.post('/signup/add',(req,res) => {
         signup.signUp(req,res);
     })
-    //测试没通过
     // 判断用户名是否重复
     app.post('/signup/judge',(req,res) => {
         signup.judgeValue(req,res)
@@ -81,7 +81,7 @@ module.exports = function(app){
     })
 
     //好友昵称修改
-    app.post('/user/markname',(req,res) => {
+    app.post('/user/getmarkname',(req,res) => {
         user.friendMarkName(req,res)
     })
 

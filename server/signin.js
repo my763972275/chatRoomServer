@@ -8,6 +8,7 @@ exports.signIn = function(req,res){
     dbServer.userMatch(data,pwd,res);
 }
 
+// token测试
 exports.test = function(req,res){
     let token = req.body.token;
     let jg = jwt.verifyToken(token);
