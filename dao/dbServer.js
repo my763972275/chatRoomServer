@@ -219,7 +219,7 @@ exports.userUpdate = function(data,res){
                                         update(data.id,updatestr,res)
                                     }else{
                                         //已存在
-                                        res.send({status:300})
+                                        res.send({status:600})
                                     }
                                 }
                             })
