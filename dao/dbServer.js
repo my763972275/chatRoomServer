@@ -392,7 +392,8 @@ exports.getUsers = function(data,res){
                 name:ver.friendID.name,
                 markname:ver.markname,
                 imgurl:ver.friendID.imgurl,
-                lastTime:ver.lastTime
+                lastTime:ver.lastTime,
+                type:0
             }
         })
         res.send({status:200,result})
@@ -462,12 +463,13 @@ exports.getGroup = function(uid,res){
     query.exec().then(function(e){
         let result = e.map(function(ver){
             return {
-                gid:ver.groupID._id,
+                id:ver.groupID._id,
                 name:ver.groupID.name,
                 markname:ver.name,
                 imgurl:ver.groupID.imgurl,
                 lastTime:ver.lastTime,
-                tip:ver.tip
+                tip:ver.tip,
+                type:1
             }
         })
         res.send({status:200,result})

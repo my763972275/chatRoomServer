@@ -12,7 +12,11 @@ module.exports = function(io){
         })
         //用户一对一消息发送
         socket.on('msg',(msg,fromid,toid) => {
-            socket.emit('msg',socket.id);
+            console.log(msg)
+            if(users[toid]){
+                socket.to[users[toid]].emit('msg',msg,fromid)
+            }
+            // socket.emit('msg',socket.id);
         })
         //用户离开
         socket.on('disconnecting',() => {
