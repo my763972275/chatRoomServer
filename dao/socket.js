@@ -12,9 +12,9 @@ module.exports = function(io){
         })
         //用户一对一消息发送
         socket.on('msg',(msg,fromid,toid) => {
-            console.log(msg)
+            console.log(fromid,toid)
             if(users[toid]){
-                socket.to[users[toid]].emit('msg',msg,fromid)
+                socket.to(users[toid]).emit('msg',msg.message,fromid)
             }
             // socket.emit('msg',socket.id);
         })

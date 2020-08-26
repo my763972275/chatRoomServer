@@ -253,7 +253,19 @@ exports.userUpdate = function(data,res){
         update(data.id,updatestr,res)
     }
 }
-
+// 获取好友昵称
+exports.getMarkName = function(data,res){
+    let wherestr = {'userID':data.uid,'friendID':data.fid};
+    let out = {'markname':1}
+    Friend.findOne(wherestr,out,function(err,result){
+        if(err){
+            res.send({status:500})
+        }else{
+            res.send({status:200,result})
+        }
+    })
+    
+}
 // 还没测试
 // 修改好友昵称
 exports.friendMarkName = function(data,res){
@@ -280,6 +292,7 @@ exports.buildFriend = function(uid,fid,state,res){
         userID:uid,
         friendID:fid,
         state:state,
+        time:new Date(),
         lastTime:new Date()
     }
     let friend = new Friend(data);
@@ -287,20 +300,7 @@ exports.buildFriend = function(uid,fid,state,res){
         if(err){
             console.log('申请好友出错')
         }else{
-            // res.send({status:200})
-        }
-    })
-}
-
-//好友最后通讯时间
-exports.upFriendLastTime = function(data){
-    let wherestr = {$or:[{'userID':data.uid,'friendID':data.fid},{'userID':data.fid,'friendID':data.uid}]};
-    let updatestr = {'lastTime':new Date()};
-    Friend.update(wherestr,updatestr,function(err,result){
-        if(err){
-            console.log('好友最后通讯时间出错')
-        }else{
-            // res.send({status:200})
+            res.send({status:200})
         }
     })
 }
@@ -314,7 +314,7 @@ exports.insertMsg = function(uid,fid,msg,type,res){
         message:msg,
         types:type,
         time:new Date(),
-        state:1
+        state:1      // 消息状态  0已读  1未读
     }
     let message = new Message(data);
 
@@ -327,6 +327,19 @@ exports.insertMsg = function(uid,fid,msg,type,res){
     })
 }
 
+
+//好友最后通讯时间
+exports.upFriendLastTime = function(data){
+    let wherestr = {$or:[{'userID':data.uid,'friendID':data.fid},{'userID':data.fid,'friendID':data.uid}]};
+    let updatestr = {'lastTime':new Date()};
+    Friend.update(wherestr,updatestr,function(err,result){
+        if(err){
+            console.log('好友最后通讯时间出错')
+        }else{
+            // res.send({status:200})
+        }
+    })
+}
 
 //申请表
 exports.applyFriend = function(data,res){

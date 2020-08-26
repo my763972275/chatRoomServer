@@ -17,3 +17,9 @@ exports.friendMarkName = function(req,res){
     let data = req.body;
     dbserver.friendMarkName(data,res)
 }
+
+//修改好友昵称
+exports.getMarkName = function(req,res){
+    let data = req.body;
+    dbserver.getMarkName(data,res)
+}

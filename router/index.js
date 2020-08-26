@@ -81,8 +81,12 @@ module.exports = function(app){
     })
 
     //好友昵称修改
-    app.post('/user/getmarkname',(req,res) => {
+    app.post('/user/markname',(req,res) => {
         user.friendMarkName(req,res)
+    })
+    //好友昵称修改
+    app.post('/user/getmarkname',(req,res) => {
+        user.getMarkName(req,res)
     })
 
     app.post('/user/update',(req,res) => {
