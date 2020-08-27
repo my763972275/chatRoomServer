@@ -300,7 +300,7 @@ exports.buildFriend = function(uid,fid,state,res){
         if(err){
             console.log('申请好友出错')
         }else{
-            res.send({status:200})
+            // res.send({status:200})
         }
     })
 }
@@ -320,19 +320,23 @@ exports.insertMsg = function(uid,fid,msg,type,res){
 
     message.save(function(err,result){
         if(err){
-            res.send({status:500})
+            if(res){
+                res.send({status:500})
+            }
         }else{
-            res.send({status:200})
+            if(res){
+                res.send({status:200})
+            }
         }
     })
 }
 
 
 //好友最后通讯时间
-exports.upFriendLastTime = function(data){
+exports.upFriendLastTime = function(data,res){
     let wherestr = {$or:[{'userID':data.uid,'friendID':data.fid},{'userID':data.fid,'friendID':data.uid}]};
     let updatestr = {'lastTime':new Date()};
-    Friend.update(wherestr,updatestr,function(err,result){
+    Friend.updateOne(wherestr,updatestr,function(err,result){
         if(err){
             console.log('好友最后通讯时间出错')
         }else{
@@ -438,7 +442,7 @@ exports.getOneMsg = function(data,res){
 //获取未读消息数
 exports.unreadMsg = function(data,res){
     //汇总条件
-    let wherestr = {'userID':data.uid,'friendID':data.fid,'state':1};
+    let wherestr = {'userID':data.fid,'friendID':data.uid,'state':1};
     Message.countDocuments(wherestr,(err,result) => {
         if(err){
             res.send({status:500})
@@ -451,7 +455,7 @@ exports.unreadMsg = function(data,res){
 //一对一消息状态修改
 exports.updateMsg = function(data,res){
     //修改项条件
-    let wherestr = {'userID':data.uid,'friendID':data.fid,'state':1};
+    let wherestr = {'userID':data.uid,'friendID':data.fid,'state':1};  //state 0已读消息数  1未读消息数
     //修改内容
     let updatestr = {'state':0}
     Message.updateMany(wherestr,updatestr,(err,result) => {
@@ -513,9 +517,9 @@ exports.getOneGroupMsg = function(gid,res){
 
 
 //群消息状态修改
-exports.updateGroupMsg = function(gid,res){
+exports.updateGroupMsg = function(data,res){
     //修改项条件
-    let wherestr = {'groupID':gid};
+    let wherestr = {'userID':data.uid,'groupID':data.fid};
     //修改内容
     let updatestr = {'tip':0}
     Message.updateMany(wherestr,updatestr,(err,result) => {
@@ -524,5 +528,37 @@ exports.updateGroupMsg = function(gid,res){
         }else{
             res.send({status:200})
         }
+    })
+}
+
+// 分页消息操作
+// 分页获取数据一对一聊天数据
+exports.msg = function(data,res){
+    // 
+    var skipNum = data.nowPage * data.pageSize;   //跳过的条数
+    let query = Message.find({});
+    // 查询条件
+    query.where({$or:[{'userID':data.uid,'friendID':data.fid},{'userID':data.fid,'friendID':data.uid}]});
+    query.sort({'time':-1});
+    // 查找friendID关联的user对象
+    query.populate('userID');
+    // 跳过条数
+    query.skip(skipNum);
+    // 一页条数
+    query.limit(data.pageSize);
+    query.exec().then(function(e){
+        let result = e.map(function(ver){
+            return {
+                id:ver._id,
+                message:ver.message,
+                types:ver.types,
+                time:ver.time,
+                fromId:ver.userID._id,
+                imgurl:ver.userID.imgurl
+            }
+        })
+        res.send({status:200,result})
+    }).catch(function(err){
+        res.send({status:500})
     })
 }

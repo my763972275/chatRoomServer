@@ -4,6 +4,7 @@ const db = require('../config/db');
 //获取好友列表
 exports.getFriend = function(req,res){
     let data = req.body;
+    // let state = req.body.state;
     dbserver.getUsers(data,res)
 }
 

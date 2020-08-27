@@ -7,10 +7,10 @@ var UserSchema = new Schema({
     name:{type:String},                          //用户名
     psw:{type:String},                           //密码
     email:{type:String},                         //邮箱
-    sex:{type:String,default:'asexual'},         //性别
+    sex:{type:String,default:'male'},         //性别
     birth:{type:Date},                           //生日
-    phone:{type:String,default:'15850645842'},                         //电话
-    explain:{type:Number},                       //介绍
+    phone:{type:String},                         //电话
+    explain:{type:String},                       //介绍
     imgurl:{type:String, default:'/images/user.png'},    //头像
     time:{type:Date},                            //注册时间                       
 });
